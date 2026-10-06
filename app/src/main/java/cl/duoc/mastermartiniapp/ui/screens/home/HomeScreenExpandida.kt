@@ -22,12 +22,21 @@ import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenExpandida() {
+fun HomeScreenExpandida(
+    onExplorarContenido: () -> Unit
+) {
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+
         topBar = {
             TopAppBar(
-                title = { Text("Master Martini") }
+                title = {
+                    Text(
+                        text = "Master Martini",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             )
         }
     ) { innerPadding ->
@@ -47,7 +56,9 @@ fun HomeScreenExpandida() {
             ) {
 
                 Image(
-                    painter = painterResource(R.drawable.master_martini_logo),
+                    painter = painterResource(
+                        R.drawable.home_hero
+                    ),
                     contentDescription = "Logo Master Martini"
                 )
 
@@ -60,6 +71,14 @@ fun HomeScreenExpandida() {
                     text = "Contenido técnico para profesionales de la gastronomía.",
                     style = MaterialTheme.typography.bodyLarge
                 )
+
+                Button(
+                    onClick = onExplorarContenido
+                ) {
+                    Text(
+                        text = "Explorar contenido"
+                    )
+                }
             }
 
             Column(
@@ -72,16 +91,28 @@ fun HomeScreenExpandida() {
                     style = MaterialTheme.typography.headlineMedium
                 )
 
-                Button(onClick = { }) {
-                    Text("Recetas")
+                Button(
+                    onClick = { }
+                ) {
+                    Text(
+                        text = "Recetas"
+                    )
                 }
 
-                Button(onClick = { }) {
-                    Text("Cursos")
+                Button(
+                    onClick = { }
+                ) {
+                    Text(
+                        text = "Cursos"
+                    )
                 }
 
-                Button(onClick = { }) {
-                    Text("Videos")
+                Button(
+                    onClick = { }
+                ) {
+                    Text(
+                        text = "Videos"
+                    )
                 }
 
                 Text(
@@ -92,6 +123,11 @@ fun HomeScreenExpandida() {
                 Text(
                     text = "Tarta intensa de chocolate",
                     style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "Intermedio · 45 min",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -105,7 +141,11 @@ fun HomeScreenExpandida() {
 )
 @Composable
 fun HomeExpandidaPreview() {
+
     MasterMartiniApp_Grupo9Theme {
-        HomeScreenExpandida()
+
+        HomeScreenExpandida(
+            onExplorarContenido = {}
+        )
     }
 }

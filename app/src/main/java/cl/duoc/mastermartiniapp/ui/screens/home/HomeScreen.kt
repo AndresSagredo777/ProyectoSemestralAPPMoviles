@@ -5,22 +5,29 @@ import androidx.compose.runtime.Composable
 import cl.duoc.mastermartiniapp.ui.utils.obtenerWindowSizeClass
 
 @Composable
-fun HomeScreen() {
-
+fun HomeScreen(
+    onExplorarContenido: () -> Unit
+) {
     val windowSizeClass = obtenerWindowSizeClass()
 
     when (windowSizeClass.widthSizeClass) {
 
         WindowWidthSizeClass.Compact -> {
-            HomeScreenCompacta()
+            HomeScreenCompacta(
+                onExplorarContenido = onExplorarContenido
+            )
         }
 
         WindowWidthSizeClass.Medium -> {
-            HomeScreenMediana()
+            HomeScreenMediana(
+                onExplorarContenido = onExplorarContenido
+            )
         }
 
         WindowWidthSizeClass.Expanded -> {
-            HomeScreenExpandida()
+            HomeScreenExpandida(
+                onExplorarContenido = onExplorarContenido
+            )
         }
     }
 }

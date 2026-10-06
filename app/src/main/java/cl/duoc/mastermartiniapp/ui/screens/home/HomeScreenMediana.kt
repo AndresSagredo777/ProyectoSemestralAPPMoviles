@@ -24,12 +24,21 @@ import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenMediana() {
+fun HomeScreenMediana(
+    onExplorarContenido: () -> Unit
+) {
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+
         topBar = {
             TopAppBar(
-                title = { Text("Master Martini") }
+                title = {
+                    Text(
+                        text = "Master Martini",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             )
         }
     ) { innerPadding ->
@@ -49,7 +58,9 @@ fun HomeScreenMediana() {
             ) {
 
                 Image(
-                    painter = painterResource(R.drawable.master_martini_logo),
+                    painter = painterResource(
+                        R.drawable.home_hero
+                    ),
                     contentDescription = "Logo Master Martini",
                     modifier = Modifier.size(180.dp)
                 )
@@ -70,9 +81,11 @@ fun HomeScreenMediana() {
                     )
 
                     Button(
-                        onClick = { }
+                        onClick = onExplorarContenido
                     ) {
-                        Text("Explorar contenido")
+                        Text(
+                            text = "Explorar contenido"
+                        )
                     }
                 }
             }
@@ -87,18 +100,48 @@ fun HomeScreenMediana() {
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                Button({ }, Modifier.weight(1f)) {
-                    Text("Recetas")
+                Button(
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Recetas"
+                    )
                 }
 
-                Button({ }, Modifier.weight(1f)) {
-                    Text("Cursos")
+                Button(
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Cursos"
+                    )
                 }
 
-                Button({ }, Modifier.weight(1f)) {
-                    Text("Videos")
+                Button(
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Videos"
+                    )
                 }
             }
+
+            Text(
+                text = "Contenido destacado",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Text(
+                text = "Tarta intensa de chocolate",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = "Intermedio · 45 min",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -110,7 +153,11 @@ fun HomeScreenMediana() {
 )
 @Composable
 fun HomeMedianaPreview() {
+
     MasterMartiniApp_Grupo9Theme {
-        HomeScreenMediana()
+
+        HomeScreenMediana(
+            onExplorarContenido = {}
+        )
     }
 }

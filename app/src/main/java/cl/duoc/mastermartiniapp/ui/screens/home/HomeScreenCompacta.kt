@@ -22,10 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartiniapp.R
 import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenCompacta() {
+fun HomeScreenCompacta(
+    onExplorarContenido: () -> Unit
+) {
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -52,12 +56,13 @@ fun HomeScreenCompacta() {
         ) {
 
             Image(
-                painter = painterResource(R.drawable.master_martini_logo),
-                contentDescription = "Logo Master Martini",
+                painter = painterResource(R.drawable.home_hero),
+                contentDescription = "Pastelera preparando un producto",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp),
-                contentScale = ContentScale.Fit
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
             )
 
             Text(
@@ -71,7 +76,7 @@ fun HomeScreenCompacta() {
             )
 
             Button(
-                onClick = { },
+                onClick = onExplorarContenido,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Explorar contenido")
@@ -135,6 +140,8 @@ fun HomeScreenCompacta() {
 @Composable
 fun HomeCompactaPreview() {
     MasterMartiniApp_Grupo9Theme {
-        HomeScreenCompacta()
+        HomeScreenCompacta(
+            onExplorarContenido = {}
+        )
     }
 }
