@@ -4,14 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as itemsGrid
+import androidx.compose.foundation.lazy.items as itemsLista
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,16 +27,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.mastermartiniapp.model.Categoria
 import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
+import cl.duoc.mastermartiniapp.ui.utils.obtenerWindowSizeClass
 import cl.duoc.mastermartiniapp.viewmodel.CategoriasUiState
 import cl.duoc.mastermartiniapp.viewmodel.CategoriasViewModel
 
@@ -41,8 +51,11 @@ fun CategoriasScreen(
 
     val uiState by categoriasViewModel.uiState.collectAsState()
 
+    val windowSizeClass = obtenerWindowSizeClass()
+
     CategoriasContenido(
         uiState = uiState,
+        anchoPantalla = windowSizeClass.widthSizeClass,
         onReintentar = {
             categoriasViewModel.cargarCategorias()
         }
@@ -53,6 +66,7 @@ fun CategoriasScreen(
 @Composable
 fun CategoriasContenido(
     uiState: CategoriasUiState,
+    anchoPantalla: WindowWidthSizeClass,
     onReintentar: () -> Unit
 ) {
 
@@ -60,8 +74,10 @@ fun CategoriasContenido(
         containerColor = MaterialTheme.colorScheme.background,
 
         topBar = {
+
             TopAppBar(
                 title = {
+
                     Text(
                         text = "Categorías",
                         style = MaterialTheme.typography.titleLarge
@@ -106,6 +122,7 @@ fun CategoriasContenido(
 
                 ListaCategorias(
                     categorias = uiState.categorias,
+                    anchoPantalla = anchoPantalla,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
@@ -118,15 +135,86 @@ fun CategoriasContenido(
 @Composable
 fun ListaCategorias(
     categorias: List<Categoria>,
+    anchoPantalla: WindowWidthSizeClass,
     modifier: Modifier = Modifier
 ) {
 
     Column(
         modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 16.dp)
+    ) {
 
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        EncabezadoCategorias()
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        when (anchoPantalla) {
+
+            WindowWidthSizeClass.Compact -> {
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+
+                    itemsLista(categorias) { categoria ->
+
+                        CategoriaCard(
+                            categoria = categoria
+                        )
+                    }
+                }
+            }
+
+            WindowWidthSizeClass.Medium -> {
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+
+                    itemsGrid(categorias) { categoria ->
+
+                        CategoriaCard(
+                            categoria = categoria
+                        )
+                    }
+                }
+            }
+
+            else -> {
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+
+                    itemsGrid(categorias) { categoria ->
+
+                        CategoriaCard(
+                            categoria = categoria
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EncabezadoCategorias() {
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Text(
@@ -144,13 +232,6 @@ fun ListaCategorias(
             text = "Elige una especialidad para descubrir recetas, técnicas y cursos.",
             style = MaterialTheme.typography.bodyLarge
         )
-
-        categorias.forEach { categoria ->
-
-            CategoriaCard(
-                categoria = categoria
-            )
-        }
     }
 }
 
@@ -162,30 +243,43 @@ fun CategoriaCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
 
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
 
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
+        ),
+
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
         )
     ) {
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(14.dp),
 
             horizontalArrangement = Arrangement.spacedBy(16.dp),
+
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(76.dp)
                     .background(
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            )
+                        shape = RoundedCornerShape(10.dp)
+                    ),
+
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    text = categoria.icono,
+                    fontSize = 34.sp
+                )
+            }
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -199,7 +293,8 @@ fun CategoriaCard(
 
                 Text(
                     text = categoria.descripcion,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -216,9 +311,20 @@ fun EstadoCargando(
         contentAlignment = Alignment.Center
     ) {
 
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "Cargando categorías...",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
 
@@ -233,18 +339,21 @@ fun EstadoError(
         modifier = modifier.padding(24.dp),
 
         horizontalAlignment = Alignment.CenterHorizontally,
+
         verticalArrangement = Arrangement.Center
     ) {
 
         Text(
-            text = "Ocurrió un problema",
+            text = "No pudimos cargar el contenido",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.error
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
         )
 
         Text(
             text = mensaje,
             style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)
         )
 
@@ -270,10 +379,22 @@ fun EstadoVacio(
         contentAlignment = Alignment.Center
     ) {
 
-        Text(
-            text = "Aún no hay categorías disponibles.",
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            Text(
+                text = "Todavía no hay categorías",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Text(
+                text = "Vuelve más tarde para descubrir nuevo contenido.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -293,18 +414,24 @@ fun CategoriasExitoPreview() {
                 categorias = listOf(
                     Categoria(
                         nombre = "Chocolatería",
-                        descripcion = "Técnicas, recetas y preparaciones con chocolate"
+                        descripcion = "Técnicas y preparaciones con chocolate",
+                        icono = "🍫"
                     ),
                     Categoria(
                         nombre = "Pastelería",
-                        descripcion = "Postres y técnicas profesionales"
+                        descripcion = "Postres y técnicas profesionales",
+                        icono = "🧁"
                     ),
                     Categoria(
                         nombre = "Panadería",
-                        descripcion = "Masas, panes y procesos de horneado"
+                        descripcion = "Masas y procesos de horneado",
+                        icono = "🍞"
                     )
                 )
             ),
+
+            anchoPantalla = WindowWidthSizeClass.Compact,
+
             onReintentar = {}
         )
     }
@@ -325,6 +452,9 @@ fun CategoriasCargandoPreview() {
             uiState = CategoriasUiState(
                 cargando = true
             ),
+
+            anchoPantalla = WindowWidthSizeClass.Compact,
+
             onReintentar = {}
         )
     }
@@ -345,6 +475,9 @@ fun CategoriasVacioPreview() {
             uiState = CategoriasUiState(
                 categorias = emptyList()
             ),
+
+            anchoPantalla = WindowWidthSizeClass.Compact,
+
             onReintentar = {}
         )
     }
@@ -365,6 +498,9 @@ fun CategoriasErrorPreview() {
             uiState = CategoriasUiState(
                 mensajeError = "No se pudieron cargar las categorías."
             ),
+
+            anchoPantalla = WindowWidthSizeClass.Compact,
+
             onReintentar = {}
         )
     }

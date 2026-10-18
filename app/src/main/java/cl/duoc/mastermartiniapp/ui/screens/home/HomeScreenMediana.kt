@@ -6,8 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,8 +35,10 @@ fun HomeScreenMediana(
         containerColor = MaterialTheme.colorScheme.background,
 
         topBar = {
+
             TopAppBar(
                 title = {
+
                     Text(
                         text = "Master Martini",
                         style = MaterialTheme.typography.titleLarge
@@ -54,6 +59,7 @@ fun HomeScreenMediana(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
+
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
 
@@ -61,12 +67,22 @@ fun HomeScreenMediana(
                     painter = painterResource(
                         R.drawable.home_hero
                     ),
-                    contentDescription = "Logo Master Martini",
-                    modifier = Modifier.size(180.dp)
+
+                    contentDescription = "Pastelera preparando un producto",
+
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(230.dp)
+                        .clip(
+                            RoundedCornerShape(18.dp)
+                        ),
+
+                    contentScale = ContentScale.Crop
                 )
 
                 Column(
                     modifier = Modifier.weight(1f),
+
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
 
@@ -83,6 +99,7 @@ fun HomeScreenMediana(
                     Button(
                         onClick = onExplorarContenido
                     ) {
+
                         Text(
                             text = "Explorar contenido"
                         )
@@ -95,53 +112,14 @@ fun HomeScreenMediana(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
-                Button(
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Recetas"
-                    )
-                }
-
-                Button(
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Cursos"
-                    )
-                }
-
-                Button(
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Videos"
-                    )
-                }
-            }
+            TiposContenido()
 
             Text(
                 text = "Contenido destacado",
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Text(
-                text = "Tarta intensa de chocolate",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Text(
-                text = "Intermedio · 45 min",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            ContenidoDestacado()
         }
     }
 }

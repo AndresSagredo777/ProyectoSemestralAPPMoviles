@@ -34,7 +34,7 @@ class CategoriasViewModel : ViewModel() {
 
             try {
 
-                // Simula una carga mientras todavía no tenemos API.
+                // Temporal: simula la espera de una API.
                 delay(800)
 
                 val categorias = obtenerCategorias()
@@ -61,27 +61,33 @@ class CategoriasViewModel : ViewModel() {
         return listOf(
             Categoria(
                 nombre = "Chocolatería",
-                descripcion = "Técnicas, recetas y preparaciones con chocolate"
+                descripcion = "Técnicas, recetas y preparaciones con chocolate",
+                icono = "🍫"
             ),
             Categoria(
                 nombre = "Pastelería",
-                descripcion = "Postres y técnicas profesionales"
+                descripcion = "Postres y técnicas profesionales",
+                icono = "🧁"
             ),
             Categoria(
                 nombre = "Panadería",
-                descripcion = "Masas, panes y procesos de horneado"
+                descripcion = "Masas, panes y procesos de horneado",
+                icono = "🍞"
             ),
             Categoria(
                 nombre = "Heladería",
-                descripcion = "Preparaciones frías y técnicas de heladería"
+                descripcion = "Preparaciones frías y técnicas de heladería",
+                icono = "🍨"
             ),
             Categoria(
                 nombre = "Bollería",
-                descripcion = "Masas laminadas y productos de bollería"
+                descripcion = "Masas laminadas y productos de bollería",
+                icono = "🥐"
             ),
             Categoria(
                 nombre = "Galletas y horneo",
-                descripcion = "Productos horneados y técnicas de cocción"
+                descripcion = "Productos horneados y técnicas de cocción",
+                icono = "🍪"
             )
         )
     }

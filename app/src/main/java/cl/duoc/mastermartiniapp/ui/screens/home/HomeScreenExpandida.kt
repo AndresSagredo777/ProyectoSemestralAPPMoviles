@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,8 +35,10 @@ fun HomeScreenExpandida(
         containerColor = MaterialTheme.colorScheme.background,
 
         topBar = {
+
             TopAppBar(
                 title = {
+
                     Text(
                         text = "Master Martini",
                         style = MaterialTheme.typography.titleLarge
@@ -52,6 +59,7 @@ fun HomeScreenExpandida(
 
             Column(
                 modifier = Modifier.weight(1f),
+
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
@@ -59,7 +67,17 @@ fun HomeScreenExpandida(
                     painter = painterResource(
                         R.drawable.home_hero
                     ),
-                    contentDescription = "Logo Master Martini"
+
+                    contentDescription = "Pastelera preparando un producto",
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(
+                            RoundedCornerShape(20.dp)
+                        ),
+
+                    contentScale = ContentScale.Crop
                 )
 
                 Text(
@@ -68,13 +86,14 @@ fun HomeScreenExpandida(
                 )
 
                 Text(
-                    text = "Contenido técnico para profesionales de la gastronomía.",
+                    text = "Contenido técnico creado para profesionales de la gastronomía.",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 Button(
                     onClick = onExplorarContenido
                 ) {
+
                     Text(
                         text = "Explorar contenido"
                     )
@@ -83,7 +102,8 @@ fun HomeScreenExpandida(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
                 Text(
@@ -91,44 +111,14 @@ fun HomeScreenExpandida(
                     style = MaterialTheme.typography.headlineMedium
                 )
 
-                Button(
-                    onClick = { }
-                ) {
-                    Text(
-                        text = "Recetas"
-                    )
-                }
-
-                Button(
-                    onClick = { }
-                ) {
-                    Text(
-                        text = "Cursos"
-                    )
-                }
-
-                Button(
-                    onClick = { }
-                ) {
-                    Text(
-                        text = "Videos"
-                    )
-                }
+                TiposContenido()
 
                 Text(
                     text = "Contenido destacado",
                     style = MaterialTheme.typography.titleLarge
                 )
 
-                Text(
-                    text = "Tarta intensa de chocolate",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = "Intermedio · 45 min",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                ContenidoDestacado()
             }
         }
     }

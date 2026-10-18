@@ -4,9 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+
 private val LightColorScheme = lightColorScheme(
+
     primary = Wine,
     onPrimary = Color.White,
+
+    primaryContainer = WineLight,
+    onPrimaryContainer = Wine,
 
     secondary = Gold,
     onSecondary = Charcoal,
@@ -18,15 +23,14 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Charcoal,
 
     error = ErrorRed,
-    outline = Line,
-
-
+    outline = Line
 )
 
 @Composable
 fun MasterMartiniApp_Grupo9Theme(
     content: @Composable () -> Unit
 ) {
+
     MaterialTheme(
         colorScheme = LightColorScheme,
         typography = Typography,
