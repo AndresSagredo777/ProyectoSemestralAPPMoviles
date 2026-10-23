@@ -92,11 +92,16 @@ fun HomeScreenCompacta(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 20.dp,
+                    bottom = 16.dp
+                ),
 
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-
+            EtiquetaPrincipalHome()
             Text(
                 text = "Aprende, crea y potencia tu negocio",
                 style = MaterialTheme.typography.headlineMedium
@@ -112,19 +117,20 @@ fun HomeScreenCompacta(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Explorar contenido")
+                Text(
+                    text = "Explorar contenido",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
 
-            Text(
-                text = "Explora nuestro contenido",
-                style = MaterialTheme.typography.titleLarge
+            TituloSeccion(
+                texto = "Explora nuestro contenido"
             )
 
             TiposContenido()
 
-            Text(
-                text = "Contenido destacado",
-                style = MaterialTheme.typography.titleLarge
+            TituloSeccion(
+                texto = "Contenido destacado"
             )
 
             ContenidoDestacado()

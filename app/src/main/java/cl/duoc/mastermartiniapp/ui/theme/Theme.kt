@@ -7,14 +7,17 @@ import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
 
-    primary = Wine,
+    primary = MartiniGreen,
     onPrimary = Color.White,
 
-    primaryContainer = WineLight,
-    onPrimaryContainer = Wine,
+    primaryContainer = MartiniGreenLight,
+    onPrimaryContainer = MartiniGreenDark,
 
     secondary = Gold,
     onSecondary = Charcoal,
+
+    secondaryContainer = GoldLight,
+    onSecondaryContainer = Charcoal,
 
     background = Cream,
     onBackground = Charcoal,
@@ -22,7 +25,11 @@ private val LightColorScheme = lightColorScheme(
     surface = Color.White,
     onSurface = Charcoal,
 
+    surfaceVariant = Color(0xFFF4F1EC),
+    onSurfaceVariant = Muted,
+
     error = ErrorRed,
+
     outline = Line
 )
 

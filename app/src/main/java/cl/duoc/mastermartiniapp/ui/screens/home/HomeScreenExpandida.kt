@@ -88,7 +88,7 @@ fun HomeScreenExpandida(
 
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
+            EtiquetaPrincipalHome()
             Text(
                 text = "Aprende, crea y potencia tu negocio",
                 style = MaterialTheme.typography.headlineLarge
@@ -104,19 +104,20 @@ fun HomeScreenExpandida(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Explorar contenido")
+                Text(
+                    text = "Explorar contenido",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
 
-            Text(
-                text = "Explora nuestro contenido",
-                style = MaterialTheme.typography.titleLarge
+            TituloSeccion(
+                texto = "Explora nuestro contenido"
             )
 
             TiposContenido()
 
-            Text(
-                text = "Contenido destacado",
-                style = MaterialTheme.typography.titleLarge
+            TituloSeccion(
+                texto = "Contenido destacado"
             )
 
             ContenidoDestacado()

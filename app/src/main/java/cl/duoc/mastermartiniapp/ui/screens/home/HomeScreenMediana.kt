@@ -101,7 +101,7 @@ fun HomeScreenMediana(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
+                    EtiquetaPrincipalHome()
                     Text(
                         text = "Aprende, crea y potencia tu negocio",
                         style = MaterialTheme.typography.headlineLarge
@@ -116,7 +116,10 @@ fun HomeScreenMediana(
                         onClick = onExplorarContenido,
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Explorar contenido")
+                        Text(
+                            text = "Explorar contenido",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
 
@@ -125,18 +128,16 @@ fun HomeScreenMediana(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
 
-                    Text(
-                        text = "Explora nuestro contenido",
-                        style = MaterialTheme.typography.titleLarge
+                    TituloSeccion(
+                        texto = "Explora nuestro contenido"
                     )
 
                     TiposContenido()
                 }
             }
 
-            Text(
-                text = "Contenido destacado",
-                style = MaterialTheme.typography.titleLarge
+            TituloSeccion(
+                texto = "Contenido destacado"
             )
 
             ContenidoDestacado()
