@@ -95,7 +95,8 @@ fun HomeScreenExpandida(
             )
 
             Text(
-                text = "Recetas, cursos y contenido técnico creado para profesionales de la gastronomía.",
+                text = "Recetas, cursos y contenido técnico para aprender\n" +
+                        "y perfeccionar tus habilidades.",
                 style = MaterialTheme.typography.bodyLarge
             )
 

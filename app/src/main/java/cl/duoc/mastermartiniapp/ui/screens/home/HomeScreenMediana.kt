@@ -108,7 +108,8 @@ fun HomeScreenMediana(
                     )
 
                     Text(
-                        text = "Recetas, cursos y contenido técnico creado para profesionales como tú.",
+                        text = "Recetas, cursos y contenido técnico para aprender\n" +
+                                "y perfeccionar tus habilidades.",
                         style = MaterialTheme.typography.bodyLarge
                     )
 

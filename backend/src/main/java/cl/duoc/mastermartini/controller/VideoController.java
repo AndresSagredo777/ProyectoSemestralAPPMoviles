@@ -17,24 +17,31 @@ public class VideoController {
         return List.of(
                 new Video(
                         1L,
-                        "Introducción al temperado de chocolate",
-                        "Aprende los conceptos básicos para trabajar correctamente el chocolate.",
+                        "Técnica con chocolate",
+                        "Contenido técnico de Master Martini sobre preparación y trabajo con chocolate.",
                         "Chocolatería",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "https://www.youtube.com/watch?v=v_WinlHRQt0"
                 ),
                 new Video(
                         2L,
-                        "Fundamentos de panadería",
-                        "Conceptos esenciales para preparar masas y panes.",
-                        "Panadería",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "Preparación de pastelería",
+                        "Contenido técnico de Master Martini orientado a preparaciones de pastelería.",
+                        "Pastelería",
+                        "https://www.youtube.com/watch?v=vmC2JpTvrLM"
                 ),
                 new Video(
                         3L,
-                        "Técnicas básicas de pastelería",
-                        "Revisión de técnicas utilizadas en preparaciones de pastelería.",
-                        "Pastelería",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "Preparación de heladería",
+                        "Contenido técnico de Master Martini relacionado con productos y técnicas de heladería.",
+                        "Heladería",
+                        "https://www.youtube.com/watch?v=KhhA9pAJZxA"
+                ),
+                new Video(
+                        4L,
+                        "Masa de hojaldre",
+                        "Preparación de masa laminada utilizando Master Export Hoja.",
+                        "Bollería",
+                        "https://www.youtube.com/watch?v=1yv3Kb7KdEk"
                 )
         );
     }

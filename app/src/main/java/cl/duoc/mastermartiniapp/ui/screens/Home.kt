@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 fun EtiquetaPrincipalHome() {
 
     Text(
-        text = "CONTENIDO PARA PROFESIONALES",
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary
+        text = "APRENDE CON MASTER MARTINI",
+    style = MaterialTheme.typography.labelLarge,
+    color = MaterialTheme.colorScheme.primary
     )
 }
 

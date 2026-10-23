@@ -73,7 +73,7 @@ fun HomeScreenCompacta(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.Black.copy(alpha = 0.55f)
+                                Color.Black.copy(alpha = 0.65f)
                             )
                         )
                     )
@@ -81,8 +81,8 @@ fun HomeScreenCompacta(
 
             Text(
                 text = "Master Martini",
-                color = Color.White,
-                style = MaterialTheme.typography.titleLarge,
+                color = Color(0xFFFFF1D6),
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(20.dp)
@@ -108,7 +108,8 @@ fun HomeScreenCompacta(
             )
 
             Text(
-                text = "Recetas, cursos y contenido técnico creado para profesionales como tú.",
+                text = "Recetas, cursos y contenido técnico para aprender\n" +
+                        "y perfeccionar tus habilidades.",
                 style = MaterialTheme.typography.bodyLarge
             )
 

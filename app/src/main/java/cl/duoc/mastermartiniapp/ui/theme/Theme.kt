@@ -22,14 +22,13 @@ private val LightColorScheme = lightColorScheme(
     background = Cream,
     onBackground = Charcoal,
 
-    surface = Color.White,
+    surface = SurfaceSoft,
     onSurface = Charcoal,
 
-    surfaceVariant = Color(0xFFF4F1EC),
+    surfaceVariant = SurfaceVariantSoft,
     onSurfaceVariant = Muted,
 
     error = ErrorRed,
-
     outline = Line
 )
 
@@ -37,7 +36,6 @@ private val LightColorScheme = lightColorScheme(
 fun MasterMartiniApp_Grupo9Theme(
     content: @Composable () -> Unit
 ) {
-
     MaterialTheme(
         colorScheme = LightColorScheme,
         typography = Typography,
