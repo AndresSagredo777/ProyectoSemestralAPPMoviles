@@ -46,6 +46,7 @@ import cl.duoc.mastermartiniapp.viewmodel.CategoriasViewModel
 
 @Composable
 fun CategoriasScreen(
+    onCategoriaSeleccionada: (String) -> Unit,
     categoriasViewModel: CategoriasViewModel = viewModel()
 ) {
 
@@ -58,7 +59,8 @@ fun CategoriasScreen(
         anchoPantalla = windowSizeClass.widthSizeClass,
         onReintentar = {
             categoriasViewModel.cargarCategorias()
-        }
+        },
+        onCategoriaSeleccionada = onCategoriaSeleccionada
     )
 }
 
@@ -67,7 +69,8 @@ fun CategoriasScreen(
 fun CategoriasContenido(
     uiState: CategoriasUiState,
     anchoPantalla: WindowWidthSizeClass,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    onCategoriaSeleccionada: (String) -> Unit
 ) {
 
     Scaffold(
@@ -123,6 +126,7 @@ fun CategoriasContenido(
                 ListaCategorias(
                     categorias = uiState.categorias,
                     anchoPantalla = anchoPantalla,
+                    onCategoriaSeleccionada = onCategoriaSeleccionada,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
@@ -136,6 +140,7 @@ fun CategoriasContenido(
 fun ListaCategorias(
     categorias: List<Categoria>,
     anchoPantalla: WindowWidthSizeClass,
+    onCategoriaSeleccionada: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -163,7 +168,10 @@ fun ListaCategorias(
                     itemsLista(categorias) { categoria ->
 
                         CategoriaCard(
-                            categoria = categoria
+                            categoria = categoria,
+                            onClick = {
+                                onCategoriaSeleccionada(categoria.nombre)
+                            }
                         )
                     }
                 }
@@ -182,7 +190,10 @@ fun ListaCategorias(
                     itemsGrid(categorias) { categoria ->
 
                         CategoriaCard(
-                            categoria = categoria
+                            categoria = categoria,
+                            onClick = {
+                                onCategoriaSeleccionada(categoria.nombre)
+                            }
                         )
                     }
                 }
@@ -201,7 +212,10 @@ fun ListaCategorias(
                     itemsGrid(categorias) { categoria ->
 
                         CategoriaCard(
-                            categoria = categoria
+                            categoria = categoria,
+                            onClick = {
+                                onCategoriaSeleccionada(categoria.nombre)
+                            }
                         )
                     }
                 }
@@ -237,10 +251,12 @@ fun EncabezadoCategorias() {
 
 @Composable
 fun CategoriaCard(
-    categoria: Categoria
+    categoria: Categoria,
+    onClick: () -> Unit
 ) {
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
 
         shape = RoundedCornerShape(12.dp),
@@ -295,6 +311,11 @@ fun CategoriaCard(
                     text = categoria.descripcion,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Ver videos",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -432,7 +453,8 @@ fun CategoriasExitoPreview() {
 
             anchoPantalla = WindowWidthSizeClass.Compact,
 
-            onReintentar = {}
+            onReintentar = {},
+            onCategoriaSeleccionada = {}
         )
     }
 }
@@ -455,7 +477,8 @@ fun CategoriasCargandoPreview() {
 
             anchoPantalla = WindowWidthSizeClass.Compact,
 
-            onReintentar = {}
+            onReintentar = {},
+            onCategoriaSeleccionada = {}
         )
     }
 }
@@ -478,7 +501,8 @@ fun CategoriasVacioPreview() {
 
             anchoPantalla = WindowWidthSizeClass.Compact,
 
-            onReintentar = {}
+            onReintentar = {},
+            onCategoriaSeleccionada = {}
         )
     }
 }
@@ -501,7 +525,8 @@ fun CategoriasErrorPreview() {
 
             anchoPantalla = WindowWidthSizeClass.Compact,
 
-            onReintentar = {}
+            onReintentar = {},
+            onCategoriaSeleccionada = {}
         )
     }
 }
