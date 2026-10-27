@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Cámara: permiso "peligroso", se pide también en tiempo de ejecución (PerfilScreen). -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- La cámara es opcional: la app se puede instalar en equipos sin cámara. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
+    <!-- La galería se abre con el selector del sistema (GetContent),
+         que no necesita permisos de almacenamiento. -->
+
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
@@ -24,6 +37,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- FileProvider: entrega a la app de cámara una Uri segura (content://)
+             para que guarde la foto, sin exponer rutas internas del teléfono. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
