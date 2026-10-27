@@ -1,6 +1,8 @@
 package cl.duoc.mastermartiniapp.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import cl.duoc.mastermartiniapp.repository.FormularioLocalRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +17,9 @@ data class FormularioUiState(
     val enviado: Boolean = false
 )
 
-class FormularioViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(FormularioUiState())
+class FormularioViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = FormularioLocalRepository(application.applicationContext)
+    private val _uiState = MutableStateFlow(repository.cargarBorrador())
     val uiState: StateFlow<FormularioUiState> = _uiState.asStateFlow()
 
     fun actualizarNombre(valor: String) = actualizar { copy(nombre = valor, nombreError = null, enviado = false) }
@@ -32,17 +35,21 @@ class FormularioViewModel : ViewModel() {
             else -> null
         }
         val mensajeError = if (actual.mensaje.isBlank()) "Escribe un mensaje." else null
+        val valido = nombreError == null && correoError == null && mensajeError == null
         _uiState.value = actual.copy(
             nombreError = nombreError,
             correoError = correoError,
             mensajeError = mensajeError,
-            enviado = nombreError == null && correoError == null && mensajeError == null
+            enviado = valido
         )
+        if (valido) repository.guardarBorrador(actual.nombre, actual.correo, actual.mensaje)
     }
 
     fun limpiarConfirmacion() = actualizar { copy(enviado = false) }
 
     private inline fun actualizar(crossinline cambio: FormularioUiState.() -> FormularioUiState) {
-        _uiState.value = _uiState.value.cambio()
+        val nuevoEstado = _uiState.value.cambio()
+        _uiState.value = nuevoEstado
+        repository.guardarBorrador(nuevoEstado.nombre, nuevoEstado.correo, nuevoEstado.mensaje)
     }
 }

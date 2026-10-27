@@ -78,7 +78,7 @@ fun FormularioContacto(
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("✓", color = MaterialTheme.colorScheme.primary)
-                    Text("Formulario validado. ¡Gracias por tu consulta!", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text("Formulario validado y guardado en este dispositivo.", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
         }
@@ -107,3 +107,4 @@ private fun CampoFormulario(
         trailingIcon = error?.let { { Text("⚠️") } }
     )
 }
+
