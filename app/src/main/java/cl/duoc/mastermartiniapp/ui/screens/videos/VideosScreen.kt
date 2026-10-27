@@ -1,11 +1,17 @@
 package cl.duoc.mastermartiniapp.ui.screens.videos
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +23,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,27 +34,37 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.mastermartiniapp.R
 import cl.duoc.mastermartiniapp.model.Video
+import cl.duoc.mastermartiniapp.viewmodel.FavoritosViewModel
 import cl.duoc.mastermartiniapp.viewmodel.VideosUiState
 import cl.duoc.mastermartiniapp.viewmodel.VideosViewModel
 
 @Composable
 fun VideosScreen(
     categoria: String,
-    videosViewModel: VideosViewModel = viewModel()
+    onVolver: (() -> Unit)? = null,
+    videosViewModel: VideosViewModel = viewModel(),
+    favoritosViewModel: FavoritosViewModel = viewModel()
 ) {
 
     val uiState by videosViewModel.uiState.collectAsState()
+
+    val idsFavoritos by favoritosViewModel.idsFavoritos.collectAsState()
 
     val context = LocalContext.current
 
     VideosContenido(
         categoria = categoria,
         uiState = uiState,
+        idsFavoritos = idsFavoritos,
+        onVolver = onVolver,
 
         onReintentar = {
             videosViewModel.cargarVideos()
@@ -59,7 +77,15 @@ fun VideosScreen(
                 Uri.parse(url)
             )
 
-            context.startActivity(intent)
+            try {
+                context.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                // No hay app para abrir el enlace (YouTube o navegador).
+            }
+        },
+
+        onAlternarFavorito = { video ->
+            favoritosViewModel.alternarFavorito(video)
         }
     )
 }
@@ -70,7 +96,10 @@ fun VideosContenido(
     categoria: String,
     uiState: VideosUiState,
     onReintentar: () -> Unit,
-    onVerVideo: (String) -> Unit
+    onVerVideo: (String) -> Unit,
+    idsFavoritos: Set<Long> = emptySet(),
+    onAlternarFavorito: (Video) -> Unit = {},
+    onVolver: (() -> Unit)? = null
 ) {
 
     val videosCategoria =
@@ -93,6 +122,20 @@ fun VideosContenido(
                         text = "Videos · $categoria",
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+
+                navigationIcon = {
+
+                    if (onVolver != null) {
+
+                        IconButton(onClick = onVolver) {
+
+                            Icon(
+                                painter = painterResource(R.drawable.ic_volver),
+                                contentDescription = "Volver a categorías"
+                            )
+                        }
+                    }
                 }
             )
         }
@@ -136,7 +179,9 @@ fun VideosContenido(
 
                 ListaVideos(
                     videos = videosCategoria,
+                    idsFavoritos = idsFavoritos,
                     onVerVideo = onVerVideo,
+                    onAlternarFavorito = onAlternarFavorito,
 
                     modifier = Modifier
                         .fillMaxSize()
@@ -151,7 +196,9 @@ fun VideosContenido(
 fun ListaVideos(
     videos: List<Video>,
     onVerVideo: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    idsFavoritos: Set<Long> = emptySet(),
+    onAlternarFavorito: (Video) -> Unit = {}
 ) {
 
     LazyColumn(
@@ -164,8 +211,12 @@ fun ListaVideos(
 
             VideoCard(
                 video = video,
+                esFavorito = video.id in idsFavoritos,
                 onVerVideo = {
                     onVerVideo(video.urlVideo)
+                },
+                onAlternarFavorito = {
+                    onAlternarFavorito(video)
                 }
             )
         }
@@ -175,7 +226,9 @@ fun ListaVideos(
 @Composable
 fun VideoCard(
     video: Video,
-    onVerVideo: () -> Unit
+    onVerVideo: () -> Unit,
+    esFavorito: Boolean = false,
+    onAlternarFavorito: () -> Unit = {}
 ) {
 
     Card(
@@ -196,11 +249,24 @@ fun VideoCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(
-                text = video.categoria.uppercase(),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = video.categoria.uppercase(),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f)
+                )
+
+                BotonFavorito(
+                    esFavorito = esFavorito,
+                    tituloVideo = video.titulo,
+                    onClick = onAlternarFavorito
+                )
+            }
 
             Text(
                 text = video.titulo,
@@ -221,6 +287,52 @@ fun VideoCard(
                 Text("Ver video")
             }
         }
+    }
+}
+
+/**
+ * Corazón para guardar el video en favoritos (persistencia local).
+ * Anima su color y hace un pequeño "rebote" al marcarse.
+ */
+@Composable
+fun BotonFavorito(
+    esFavorito: Boolean,
+    tituloVideo: String,
+    onClick: () -> Unit
+) {
+
+    val color by animateColorAsState(
+        targetValue = if (esFavorito) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        label = "colorFavorito"
+    )
+
+    val escala by animateFloatAsState(
+        targetValue = if (esFavorito) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "escalaFavorito"
+    )
+
+    IconButton(onClick = onClick) {
+
+        Icon(
+            painter = painterResource(
+                if (esFavorito) R.drawable.ic_favorito else R.drawable.ic_favorito_borde
+            ),
+            contentDescription = if (esFavorito) {
+                "Quitar $tituloVideo de favoritos"
+            } else {
+                "Agregar $tituloVideo a favoritos"
+            },
+            tint = color,
+            modifier = Modifier.scale(escala)
+        )
     }
 }
 
