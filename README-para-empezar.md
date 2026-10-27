@@ -122,7 +122,3 @@ Para revisar el servidor en el navegador del computador, abre `http://localhost:
 - **Repositorio:** intermediario que organiza el acceso a los datos.
 - **Backend:** programa que corre en el computador o servidor y responde a la app.
 - **Emulador:** teléfono Android simulado dentro del computador.
-
-## Cambios locales que aparecieron en la captura
-
-La captura corresponde a una actualización de Git bloqueada porque había cambios locales en `WindowSizeUtils.kt` y `MainActivity.kt`. No se deben descartar sin revisarlos. Esta guía describe la estructura observada y no modifica esos archivos.
