@@ -28,10 +28,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartiniapp.R
 import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
+import cl.duoc.mastermartiniapp.viewmodel.FormularioUiState
 
 @Composable
 fun HomeScreenExpandida(
-    onExplorarContenido: () -> Unit
+    onExplorarContenido: () -> Unit,
+    formularioState: FormularioUiState = FormularioUiState(),
+    onNombreChange: (String) -> Unit = {},
+    onCorreoChange: (String) -> Unit = {},
+    onMensajeChange: (String) -> Unit = {},
+    onEnviar: () -> Unit = {},
+    onLimpiarConfirmacion: () -> Unit = {}
 ) {
 
     Row(
@@ -122,7 +129,15 @@ fun HomeScreenExpandida(
             )
 
             ContenidoDestacado()
-        }
+
+            FormularioContacto(
+                state = formularioState,
+                onNombreChange = onNombreChange,
+                onCorreoChange = onCorreoChange,
+                onMensajeChange = onMensajeChange,
+                onEnviar = onEnviar,
+                onLimpiarConfirmacion = onLimpiarConfirmacion
+            )        }
     }
 }
 
