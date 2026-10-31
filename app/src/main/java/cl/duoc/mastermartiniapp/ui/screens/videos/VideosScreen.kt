@@ -278,6 +278,10 @@ fun VideoCard(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            obtenerRecetaVideo(video.id)?.let { receta ->
+                IngredientesVideo(receta = receta)
+            }
+
             Button(
                 onClick = onVerVideo,
                 modifier = Modifier.fillMaxWidth(),
