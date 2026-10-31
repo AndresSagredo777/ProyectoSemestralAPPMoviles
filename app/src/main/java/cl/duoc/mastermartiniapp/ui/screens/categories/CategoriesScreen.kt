@@ -151,9 +151,11 @@ fun ListaCategorias(
 
         EncabezadoCategorias()
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ResumenCategorias(total = categorias.size)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         when (anchoPantalla) {
 
