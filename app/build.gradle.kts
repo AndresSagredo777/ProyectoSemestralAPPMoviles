@@ -47,6 +47,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -69,3 +71,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
