@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Carpetas que FileProvider puede compartir con la app de cámara.
+     Solo se expone la carpeta temporal "camara" dentro del caché de la app. -->
+<paths>
+    <cache-path
+        name="capturas_camara"
+        path="camara/" />
+</paths>

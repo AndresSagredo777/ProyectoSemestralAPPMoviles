@@ -118,11 +118,6 @@ fun HomeScreenExpandida(
                 )
             }
 
-            TituloSeccion(
-                texto = "Explora nuestro contenido"
-            )
-
-            TiposContenido()
 
             TituloSeccion(
                 texto = "Contenido destacado"

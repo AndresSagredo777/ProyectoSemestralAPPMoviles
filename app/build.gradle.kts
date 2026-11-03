@@ -46,6 +46,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 
+    // Persistencia local: perfil y videos favoritos (DataStore Preferences)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
     implementation(platform(libs.androidx.compose.bom))
     implementation("io.coil-kt.coil3:coil-compose:3.2.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
@@ -71,4 +74,3 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
-

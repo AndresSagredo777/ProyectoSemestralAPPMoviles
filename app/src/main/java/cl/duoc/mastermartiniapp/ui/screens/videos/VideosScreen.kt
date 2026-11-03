@@ -1,85 +1,123 @@
 package cl.duoc.mastermartiniapp.ui.screens.videos
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.app.DownloadManager
 import android.os.Environment
 import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import cl.duoc.mastermartiniapp.R
 import cl.duoc.mastermartiniapp.model.Video
 import cl.duoc.mastermartiniapp.network.ClienteRetrofit
+import cl.duoc.mastermartiniapp.viewmodel.FavoritosViewModel
 import cl.duoc.mastermartiniapp.viewmodel.VideosUiState
 import cl.duoc.mastermartiniapp.viewmodel.VideosViewModel
 
 @Composable
 fun VideosScreen(
     categoria: String,
-    videosViewModel: VideosViewModel = viewModel()
+    onVolver: (() -> Unit)? = null,
+    videosViewModel: VideosViewModel = viewModel(),
+    favoritosViewModel: FavoritosViewModel = viewModel()
 ) {
+
     val uiState by videosViewModel.uiState.collectAsState()
+
+    val idsFavoritos by favoritosViewModel.idsFavoritos.collectAsState()
+
     val context = LocalContext.current
 
     VideosContenido(
         categoria = categoria,
         uiState = uiState,
-        onReintentar = videosViewModel::cargarVideos,
+        idsFavoritos = idsFavoritos,
+        onVolver = onVolver,
+
+        onReintentar = {
+            videosViewModel.cargarVideos()
+        },
+
         onVerVideo = { url ->
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(url)
+            )
+
+            try {
+                context.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                // No hay app para abrir el enlace (YouTube o navegador).
+            }
+        },
+
+        onAlternarFavorito = { video ->
+            favoritosViewModel.alternarFavorito(video)
         },
         onDescargarReceta = { url, nombre ->
-            val download = DownloadManager.Request(Uri.parse(ClienteRetrofit.resolverUrl(url)))
-                .setTitle("Receta: $nombre")
+            val request = DownloadManager.Request(
+                Uri.parse(ClienteRetrofit.resolverUrl(url))
+            )
+                .setTitle("Ingredientes: $nombre")
                 .setDescription("Descargando ingredientes en PDF")
                 .setMimeType("application/pdf")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    nombre
+                .setNotificationVisibility(
+                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
                 )
-            val downloadManager = context.getSystemService(DownloadManager::class.java)
-            downloadManager.enqueue(download)
-            Toast.makeText(context, "Descarga iniciada. Revisa las notificaciones.", Toast.LENGTH_SHORT).show()
-        },
-        onAlternarFavorito = videosViewModel::alternarFavorito
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, nombre)
+
+            context.getSystemService(DownloadManager::class.java).enqueue(request)
+            Toast.makeText(
+                context,
+                "Descarga iniciada. Revisa las notificaciones.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     )
 }
 
@@ -90,47 +128,99 @@ fun VideosContenido(
     uiState: VideosUiState,
     onReintentar: () -> Unit,
     onVerVideo: (String) -> Unit,
-    onDescargarReceta: (String, String) -> Unit = { _, _ -> },
-    onAlternarFavorito: (Long) -> Unit = {}
+    idsFavoritos: Set<Long> = emptySet(),
+    onAlternarFavorito: (Video) -> Unit = {},
+    onVolver: (() -> Unit)? = null,
+    onDescargarReceta: (String, String) -> Unit = { _, _ -> }
 ) {
-    val videosCategoria = uiState.videos.filter { video ->
-        video.categoria.equals(categoria, ignoreCase = true)
-    }
+
+    val videosCategoria =
+        uiState.videos.filter { video ->
+            video.categoria.equals(
+                categoria,
+                ignoreCase = true
+            )
+        }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+
         topBar = {
+
             TopAppBar(
                 title = {
+
                     Text(
                         text = "Videos · $categoria",
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+
+                navigationIcon = {
+
+                    if (onVolver != null) {
+
+                        IconButton(onClick = onVolver) {
+
+                            Icon(
+                                painter = painterResource(R.drawable.ic_volver),
+                                contentDescription = "Volver a categorías"
+                            )
+                        }
+                    }
                 }
             )
         }
     ) { innerPadding ->
+
         when {
-            uiState.cargando -> EstadoCargandoVideos(
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-            )
-            uiState.mensajeError != null -> EstadoErrorVideos(
-                mensaje = uiState.mensajeError,
-                onReintentar = onReintentar,
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-            )
-            videosCategoria.isEmpty() -> EstadoVacioVideos(
-                categoria = categoria,
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-            )
-            else -> ListaVideos(
-                videos = videosCategoria,
-                favoritosIds = uiState.favoritosIds,
-                onVerVideo = onVerVideo,
-                onDescargarReceta = onDescargarReceta,
-                onAlternarFavorito = onAlternarFavorito,
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-            )
+
+            uiState.cargando -> {
+
+                EstadoCargandoVideos(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                )
+            }
+
+            uiState.mensajeError != null -> {
+
+                EstadoErrorVideos(
+                    mensaje = uiState.mensajeError,
+                    onReintentar = onReintentar,
+
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                )
+            }
+
+            videosCategoria.isEmpty() -> {
+
+                EstadoVacioVideos(
+                    categoria = categoria,
+
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                )
+            }
+
+            else -> {
+
+                ListaVideos(
+                    videos = videosCategoria,
+                    idsFavoritos = idsFavoritos,
+                    onVerVideo = onVerVideo,
+                    onAlternarFavorito = onAlternarFavorito,
+                    onDescargarReceta = onDescargarReceta,
+
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                )
+            }
         }
     }
 }
@@ -138,28 +228,35 @@ fun VideosContenido(
 @Composable
 fun ListaVideos(
     videos: List<Video>,
-    favoritosIds: Set<Long>,
     onVerVideo: (String) -> Unit,
-    onDescargarReceta: (String, String) -> Unit,
-    onAlternarFavorito: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    idsFavoritos: Set<Long> = emptySet(),
+    onAlternarFavorito: (Video) -> Unit = {},
+    onDescargarReceta: (String, String) -> Unit = { _, _ -> }
 ) {
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(videos, key = { it.id }) { video ->
+
+        items(videos) { video ->
+
             VideoCard(
                 video = video,
-                esFavorito = video.id in favoritosIds,
-                onVerVideo = { onVerVideo(video.urlVideo) },
+                esFavorito = video.id in idsFavoritos,
+                onVerVideo = {
+                    onVerVideo(video.urlVideo)
+                },
+                onAlternarFavorito = {
+                    onAlternarFavorito(video)
+                },
                 onDescargarReceta = {
                     video.urlRecetaPdf?.let { url ->
-                        onDescargarReceta(url, nombreArchivoPdf(video.urlRecetaPdf))
+                        onDescargarReceta(url, Uri.parse(url).lastPathSegment ?: "ingredientes.pdf")
                     }
-                },
-                onAlternarFavorito = { onAlternarFavorito(video.id) }
+                }
             )
         }
     }
@@ -168,24 +265,33 @@ fun ListaVideos(
 @Composable
 fun VideoCard(
     video: Video,
-    esFavorito: Boolean,
     onVerVideo: () -> Unit,
-    onDescargarReceta: () -> Unit,
-    onAlternarFavorito: () -> Unit
+    esFavorito: Boolean = false,
+    onAlternarFavorito: () -> Unit = {},
+    onDescargarReceta: () -> Unit = {}
 ) {
-    val miniatura = remember(video.urlVideo) { obtenerMiniaturaYoutube(video.urlVideo) }
-    var errorMiniatura by remember(video.urlVideo) { mutableStateOf(miniatura == null) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
+
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
+            val miniatura = remember(video.urlVideo) { obtenerMiniaturaYoutube(video.urlVideo) }
+            var errorMiniatura by remember(video.urlVideo) { mutableStateOf(miniatura == null) }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,45 +323,105 @@ fun VideoCard(
                 }
             }
 
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = video.categoria.uppercase(),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f)
+                )
+
+                BotonFavorito(
+                    esFavorito = esFavorito,
+                    tituloVideo = video.titulo,
+                    onClick = onAlternarFavorito
+                )
+            }
+
             Text(
-                text = video.categoria.uppercase(),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelMedium
+                text = video.titulo,
+                style = MaterialTheme.typography.titleLarge
             )
-            Text(video.titulo, style = MaterialTheme.typography.titleLarge)
-            Text(video.descripcion, style = MaterialTheme.typography.bodyMedium)
+
+            Text(
+                text = video.descripcion,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            obtenerRecetaVideo(video.id)?.let { receta ->
+                IngredientesVideo(receta = receta)
+            }
 
             Button(
                 onClick = onVerVideo,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("▶  Ver video")
+
+                Text("Ver video")
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    onClick = onDescargarReceta,
-                    enabled = video.urlRecetaPdf != null,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(if (video.urlRecetaPdf != null) "Descargar ingredientes" else "PDF no disponible")
-                }
-                OutlinedButton(
-                    onClick = onAlternarFavorito,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(if (esFavorito) "★ Favorito" else "☆ Favorito")
-                }
+            OutlinedButton(
+                onClick = onDescargarReceta,
+                enabled = video.urlRecetaPdf != null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(if (video.urlRecetaPdf != null) "Descargar ingredientes (PDF)" else "PDF no disponible")
             }
         }
     }
 }
 
-private fun nombreArchivoPdf(url: String): String =
-    Uri.parse(url).lastPathSegment ?: "ingredientes.pdf"
+/**
+ * Corazón para guardar el video en favoritos (persistencia local).
+ * Anima su color y hace un pequeño "rebote" al marcarse.
+ */
+@Composable
+fun BotonFavorito(
+    esFavorito: Boolean,
+    tituloVideo: String,
+    onClick: () -> Unit
+) {
+
+    val color by animateColorAsState(
+        targetValue = if (esFavorito) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        label = "colorFavorito"
+    )
+
+    val escala by animateFloatAsState(
+        targetValue = if (esFavorito) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "escalaFavorito"
+    )
+
+    IconButton(onClick = onClick) {
+
+        Icon(
+            painter = painterResource(
+                if (esFavorito) R.drawable.ic_favorito else R.drawable.ic_favorito_borde
+            ),
+            contentDescription = if (esFavorito) {
+                "Quitar $tituloVideo de favoritos"
+            } else {
+                "Agregar $tituloVideo a favoritos"
+            },
+            tint = color,
+            modifier = Modifier.scale(escala)
+        )
+    }
+}
 
 private fun obtenerMiniaturaYoutube(url: String): String? {
     val uri = Uri.parse(url)
@@ -269,13 +435,24 @@ private fun obtenerMiniaturaYoutube(url: String): String? {
 }
 
 @Composable
-fun EstadoCargandoVideos(modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+fun EstadoCargandoVideos(
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+
             Text("Cargando videos...")
         }
     }
@@ -287,34 +464,59 @@ fun EstadoErrorVideos(
     onReintentar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
         Text(
-            "No pudimos cargar los videos",
+            text = "No pudimos cargar los videos",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
         )
-        Text(mensaje, modifier = Modifier.padding(top = 8.dp), textAlign = TextAlign.Center)
-        Button(onClick = onReintentar, modifier = Modifier.padding(top = 16.dp)) {
+
+        Text(
+            text = mensaje,
+            modifier = Modifier.padding(top = 8.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Button(
+            onClick = onReintentar,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+
             Text("Reintentar")
         }
     }
 }
 
 @Composable
-fun EstadoVacioVideos(categoria: String, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.padding(24.dp), contentAlignment = Alignment.Center) {
+fun EstadoVacioVideos(
+    categoria: String,
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier.padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Sin videos disponibles", style = MaterialTheme.typography.titleLarge)
+
             Text(
-                "Todavía no hay videos para $categoria.",
+                text = "Sin videos disponibles",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Text(
+                text = "Todavía no hay videos para $categoria.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )

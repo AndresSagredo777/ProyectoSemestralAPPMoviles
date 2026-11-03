@@ -14,4 +14,6 @@ sealed class Ruta(val ruta: String) {
             return "videos/${Uri.encode(categoria)}"
         }
     }
+
+    object Perfil : Ruta("perfil")
 }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -95,53 +94,29 @@ fun HomeScreenMediana(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(28.dp),
-
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            EtiquetaPrincipalHome()
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            Text(
+                text = "Aprende, crea y potencia tu negocio",
+                style = MaterialTheme.typography.headlineLarge
+            )
+
+            Text(
+                text = "Recetas, cursos y contenido técnico para aprender\n" +
+                        "y perfeccionar tus habilidades.",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Button(
+                onClick = onExplorarContenido,
+                shape = RoundedCornerShape(8.dp)
             ) {
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    EtiquetaPrincipalHome()
-                    Text(
-                        text = "Aprende, crea y potencia tu negocio",
-                        style = MaterialTheme.typography.headlineLarge
-                    )
-
-                    Text(
-                        text = "Recetas, cursos y contenido técnico para aprender\n" +
-                                "y perfeccionar tus habilidades.",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Button(
-                        onClick = onExplorarContenido,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Explorar contenido",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-
-                    TituloSeccion(
-                        texto = "Explora nuestro contenido"
-                    )
-
-                    TiposContenido()
-                }
+                Text(
+                    text = "Explorar contenido",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
 
             TituloSeccion(
@@ -157,10 +132,10 @@ fun HomeScreenMediana(
                 onMensajeChange = onMensajeChange,
                 onEnviar = onEnviar,
                 onLimpiarConfirmacion = onLimpiarConfirmacion
-            )        }
+            )
+        }
     }
 }
-
 @Preview(
     showBackground = true,
     widthDp = 700,
