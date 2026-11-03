@@ -3,6 +3,9 @@ package cl.duoc.mastermartiniapp.ui.screens.videos
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.app.DownloadManager
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,17 +15,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,16 +39,24 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import cl.duoc.mastermartiniapp.R
 import cl.duoc.mastermartiniapp.model.Video
+import cl.duoc.mastermartiniapp.network.ClienteRetrofit
 import cl.duoc.mastermartiniapp.viewmodel.FavoritosViewModel
 import cl.duoc.mastermartiniapp.viewmodel.VideosUiState
 import cl.duoc.mastermartiniapp.viewmodel.VideosViewModel
@@ -86,6 +101,25 @@ fun VideosScreen(
 
         onAlternarFavorito = { video ->
             favoritosViewModel.alternarFavorito(video)
+        },
+        onDescargarReceta = { url, nombre ->
+            val request = DownloadManager.Request(
+                Uri.parse(ClienteRetrofit.resolverUrl(url))
+            )
+                .setTitle("Ingredientes: $nombre")
+                .setDescription("Descargando ingredientes en PDF")
+                .setMimeType("application/pdf")
+                .setNotificationVisibility(
+                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                )
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, nombre)
+
+            context.getSystemService(DownloadManager::class.java).enqueue(request)
+            Toast.makeText(
+                context,
+                "Descarga iniciada. Revisa las notificaciones.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     )
 }
@@ -99,7 +133,8 @@ fun VideosContenido(
     onVerVideo: (String) -> Unit,
     idsFavoritos: Set<Long> = emptySet(),
     onAlternarFavorito: (Video) -> Unit = {},
-    onVolver: (() -> Unit)? = null
+    onVolver: (() -> Unit)? = null,
+    onDescargarReceta: (String, String) -> Unit = { _, _ -> }
 ) {
 
     val videosCategoria =
@@ -182,6 +217,7 @@ fun VideosContenido(
                     idsFavoritos = idsFavoritos,
                     onVerVideo = onVerVideo,
                     onAlternarFavorito = onAlternarFavorito,
+                    onDescargarReceta = onDescargarReceta,
 
                     modifier = Modifier
                         .fillMaxSize()
@@ -198,7 +234,8 @@ fun ListaVideos(
     onVerVideo: (String) -> Unit,
     modifier: Modifier = Modifier,
     idsFavoritos: Set<Long> = emptySet(),
-    onAlternarFavorito: (Video) -> Unit = {}
+    onAlternarFavorito: (Video) -> Unit = {},
+    onDescargarReceta: (String, String) -> Unit = { _, _ -> }
 ) {
 
     LazyColumn(
@@ -217,6 +254,11 @@ fun ListaVideos(
                 },
                 onAlternarFavorito = {
                     onAlternarFavorito(video)
+                },
+                onDescargarReceta = {
+                    video.urlRecetaPdf?.let { url ->
+                        onDescargarReceta(url, Uri.parse(url).lastPathSegment ?: "ingredientes.pdf")
+                    }
                 }
             )
         }
@@ -228,7 +270,8 @@ fun VideoCard(
     video: Video,
     onVerVideo: () -> Unit,
     esFavorito: Boolean = false,
-    onAlternarFavorito: () -> Unit = {}
+    onAlternarFavorito: () -> Unit = {},
+    onDescargarReceta: () -> Unit = {}
 ) {
 
     Card(
@@ -248,6 +291,40 @@ fun VideoCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
+            val miniatura = remember(video.urlVideo) { obtenerMiniaturaYoutube(video.urlVideo) }
+            var errorMiniatura by remember(video.urlVideo) { mutableStateOf(miniatura == null) }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(190.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!errorMiniatura && miniatura != null) {
+                    AsyncImage(
+                        model = miniatura,
+                        contentDescription = "Miniatura del video ${video.titulo}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        onError = { errorMiniatura = true }
+                    )
+                }
+                if (errorMiniatura) {
+                    Text("Miniatura no disponible", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                } else {
+                    Text(
+                        text = "▶",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.65f), CircleShape)
+                            .padding(horizontal = 18.dp, vertical = 10.dp)
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -289,6 +366,15 @@ fun VideoCard(
             ) {
 
                 Text("Ver video")
+            }
+
+            OutlinedButton(
+                onClick = onDescargarReceta,
+                enabled = video.urlRecetaPdf != null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(if (video.urlRecetaPdf != null) "Descargar ingredientes (PDF)" else "PDF no disponible")
             }
         }
     }
@@ -338,6 +424,17 @@ fun BotonFavorito(
             modifier = Modifier.scale(escala)
         )
     }
+}
+
+private fun obtenerMiniaturaYoutube(url: String): String? {
+    val uri = Uri.parse(url)
+    val id = when {
+        uri.host?.contains("youtu.be", ignoreCase = true) == true -> uri.lastPathSegment
+        uri.host?.contains("youtube.com", ignoreCase = true) == true -> uri.getQueryParameter("v")
+        else -> null
+    }?.takeIf { it.isNotBlank() } ?: return null
+
+    return "https://img.youtube.com/vi/$id/hqdefault.jpg"
 }
 
 @Composable

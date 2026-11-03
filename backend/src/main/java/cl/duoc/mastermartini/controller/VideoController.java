@@ -20,28 +20,32 @@ public class VideoController {
                         "Técnica con chocolate",
                         "Contenido técnico de Master Martini sobre preparación y trabajo con chocolate.",
                         "Chocolatería",
-                        "https://www.youtube.com/watch?v=v_WinlHRQt0"
+                        "https://www.youtube.com/watch?v=v_WinlHRQt0",
+                        "/recetas/receta-chocolate.pdf"
                 ),
                 new Video(
                         2L,
                         "Preparación de pastelería",
                         "Contenido técnico de Master Martini orientado a preparaciones de pastelería.",
                         "Pastelería",
-                        "https://www.youtube.com/watch?v=vmC2JpTvrLM"
+                        "https://www.youtube.com/watch?v=vmC2JpTvrLM",
+                        "/recetas/tarta-coco.pdf"
                 ),
                 new Video(
                         3L,
                         "Preparación de heladería",
                         "Contenido técnico de Master Martini relacionado con productos y técnicas de heladería.",
                         "Heladería",
-                        "https://www.youtube.com/watch?v=KhhA9pAJZxA"
+                        "https://www.youtube.com/watch?v=KhhA9pAJZxA",
+                        "/recetas/receta-helado.pdf"
                 ),
                 new Video(
                         4L,
                         "Masa de hojaldre",
                         "Preparación de masa laminada utilizando Master Export Hoja.",
                         "Bollería",
-                        "https://www.youtube.com/watch?v=1yv3Kb7KdEk"
+                        "https://www.youtube.com/watch?v=1yv3Kb7KdEk",
+                        "/recetas/receta-ojaldre.pdf"
                 )
         );
     }

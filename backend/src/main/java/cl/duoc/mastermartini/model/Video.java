@@ -7,6 +7,7 @@ public class Video {
     private String descripcion;
     private String categoria;
     private String urlVideo;
+    private String urlRecetaPdf;
 
     public Video() {
     }
@@ -16,13 +17,15 @@ public class Video {
             String titulo,
             String descripcion,
             String categoria,
-            String urlVideo
+            String urlVideo,
+            String urlRecetaPdf
     ) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.categoria = categoria;
         this.urlVideo = urlVideo;
+        this.urlRecetaPdf = urlRecetaPdf;
     }
 
     public Long getId() {
@@ -43,5 +46,9 @@ public class Video {
 
     public String getUrlVideo() {
         return urlVideo;
+    }
+
+    public String getUrlRecetaPdf() {
+        return urlRecetaPdf;
     }
 }
