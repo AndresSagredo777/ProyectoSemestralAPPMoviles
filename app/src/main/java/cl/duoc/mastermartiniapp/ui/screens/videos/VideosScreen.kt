@@ -2,6 +2,9 @@ package cl.duoc.mastermartiniapp.ui.screens.videos
 
 import android.content.Intent
 import android.net.Uri
+import android.app.DownloadManager
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import cl.duoc.mastermartiniapp.model.Video
+import cl.duoc.mastermartiniapp.network.ClienteRetrofit
 import cl.duoc.mastermartiniapp.viewmodel.VideosUiState
 import cl.duoc.mastermartiniapp.viewmodel.VideosViewModel
 
@@ -61,6 +65,20 @@ fun VideosScreen(
         onVerVideo = { url ->
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         },
+        onDescargarReceta = { url, nombre ->
+            val download = DownloadManager.Request(Uri.parse(ClienteRetrofit.resolverUrl(url)))
+                .setTitle("Receta: $nombre")
+                .setDescription("Descargando ingredientes en PDF")
+                .setMimeType("application/pdf")
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                .setDestinationInExternalPublicDir(
+                    Environment.DIRECTORY_DOWNLOADS,
+                    nombre
+                )
+            val downloadManager = context.getSystemService(DownloadManager::class.java)
+            downloadManager.enqueue(download)
+            Toast.makeText(context, "Descarga iniciada. Revisa las notificaciones.", Toast.LENGTH_SHORT).show()
+        },
         onAlternarFavorito = videosViewModel::alternarFavorito
     )
 }
@@ -72,6 +90,7 @@ fun VideosContenido(
     uiState: VideosUiState,
     onReintentar: () -> Unit,
     onVerVideo: (String) -> Unit,
+    onDescargarReceta: (String, String) -> Unit = { _, _ -> },
     onAlternarFavorito: (Long) -> Unit = {}
 ) {
     val videosCategoria = uiState.videos.filter { video ->
@@ -108,6 +127,7 @@ fun VideosContenido(
                 videos = videosCategoria,
                 favoritosIds = uiState.favoritosIds,
                 onVerVideo = onVerVideo,
+                onDescargarReceta = onDescargarReceta,
                 onAlternarFavorito = onAlternarFavorito,
                 modifier = Modifier.fillMaxSize().padding(innerPadding)
             )
@@ -120,6 +140,7 @@ fun ListaVideos(
     videos: List<Video>,
     favoritosIds: Set<Long>,
     onVerVideo: (String) -> Unit,
+    onDescargarReceta: (String, String) -> Unit,
     onAlternarFavorito: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -133,6 +154,11 @@ fun ListaVideos(
                 video = video,
                 esFavorito = video.id in favoritosIds,
                 onVerVideo = { onVerVideo(video.urlVideo) },
+                onDescargarReceta = {
+                    video.urlRecetaPdf?.let { url ->
+                        onDescargarReceta(url, nombreArchivoPdf(video.urlRecetaPdf))
+                    }
+                },
                 onAlternarFavorito = { onAlternarFavorito(video.id) }
             )
         }
@@ -144,6 +170,7 @@ fun VideoCard(
     video: Video,
     esFavorito: Boolean,
     onVerVideo: () -> Unit,
+    onDescargarReceta: () -> Unit,
     onAlternarFavorito: () -> Unit
 ) {
     val miniatura = remember(video.urlVideo) { obtenerMiniaturaYoutube(video.urlVideo) }
@@ -208,12 +235,12 @@ fun VideoCard(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
-                    onClick = {},
-                    enabled = false,
+                    onClick = onDescargarReceta,
+                    enabled = video.urlRecetaPdf != null,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("PDF no disponible")
+                    Text(if (video.urlRecetaPdf != null) "Descargar ingredientes" else "PDF no disponible")
                 }
                 OutlinedButton(
                     onClick = onAlternarFavorito,
@@ -226,6 +253,9 @@ fun VideoCard(
         }
     }
 }
+
+private fun nombreArchivoPdf(url: String): String =
+    Uri.parse(url).lastPathSegment ?: "ingredientes.pdf"
 
 private fun obtenerMiniaturaYoutube(url: String): String? {
     val uri = Uri.parse(url)

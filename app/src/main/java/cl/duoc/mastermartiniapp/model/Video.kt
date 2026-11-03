@@ -5,5 +5,6 @@ data class Video(
     val titulo: String,
     val descripcion: String,
     val categoria: String,
-    val urlVideo: String
+    val urlVideo: String,
+    val urlRecetaPdf: String? = null
 )
