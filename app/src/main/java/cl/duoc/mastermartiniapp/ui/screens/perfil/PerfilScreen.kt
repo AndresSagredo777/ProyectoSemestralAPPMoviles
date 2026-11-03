@@ -71,8 +71,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.mastermartiniapp.R
+import cl.duoc.mastermartiniapp.model.Cuenta
+import cl.duoc.mastermartiniapp.model.Rol
 import cl.duoc.mastermartiniapp.model.Video
 import cl.duoc.mastermartiniapp.ui.components.ImagenInteligente
+import cl.duoc.mastermartiniapp.ui.components.RolBadge
 import cl.duoc.mastermartiniapp.ui.screens.home.TituloSeccion
 import cl.duoc.mastermartiniapp.ui.theme.MasterMartiniApp_Grupo9Theme
 import cl.duoc.mastermartiniapp.viewmodel.PerfilUiState
@@ -86,6 +89,8 @@ import cl.duoc.mastermartiniapp.viewmodel.PerfilViewModel
  */
 @Composable
 fun PerfilScreen(
+    cuenta: Cuenta? = null,
+    onCerrarSesion: () -> Unit = {},
     perfilViewModel: PerfilViewModel = viewModel()
 ) {
     val uiState by perfilViewModel.uiState.collectAsState()
@@ -169,7 +174,9 @@ fun PerfilScreen(
         onTelefonoChange = perfilViewModel::onTelefonoChange,
         onGuardar = perfilViewModel::guardarPerfil,
         onVerVideo = { video -> abrirEnlace(context, video.urlVideo) },
-        onQuitarFavorito = perfilViewModel::quitarFavorito
+        onQuitarFavorito = perfilViewModel::quitarFavorito,
+        cuenta = cuenta,
+        onCerrarSesion = onCerrarSesion
     )
 }
 
@@ -185,7 +192,9 @@ fun PerfilContenido(
     onTelefonoChange: (String) -> Unit,
     onGuardar: () -> Unit,
     onVerVideo: (Video) -> Unit,
-    onQuitarFavorito: (Video) -> Unit
+    onQuitarFavorito: (Video) -> Unit,
+    cuenta: Cuenta? = null,
+    onCerrarSesion: () -> Unit = {}
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -224,7 +233,9 @@ fun PerfilContenido(
                 onTelefonoChange = onTelefonoChange,
                 onGuardar = onGuardar,
                 onVerVideo = onVerVideo,
-                onQuitarFavorito = onQuitarFavorito
+                onQuitarFavorito = onQuitarFavorito,
+                cuenta = cuenta,
+                onCerrarSesion = onCerrarSesion
             )
         }
     }
@@ -241,7 +252,9 @@ private fun FormularioPerfil(
     onTelefonoChange: (String) -> Unit,
     onGuardar: () -> Unit,
     onVerVideo: (Video) -> Unit,
-    onQuitarFavorito: (Video) -> Unit
+    onQuitarFavorito: (Video) -> Unit,
+    cuenta: Cuenta?,
+    onCerrarSesion: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -259,6 +272,7 @@ private fun FormularioPerfil(
         ) {
             SeccionFoto(
                 uiState = uiState,
+                cuenta = cuenta,
                 onTomarFoto = onTomarFoto,
                 onElegirDeGaleria = onElegirDeGaleria,
                 onEliminarFoto = onEliminarFoto
@@ -280,6 +294,15 @@ private fun FormularioPerfil(
                 onVerVideo = onVerVideo,
                 onQuitarFavorito = onQuitarFavorito
             )
+
+            if (cuenta != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+
+                SeccionCuenta(
+                    cuenta = cuenta,
+                    onCerrarSesion = onCerrarSesion
+                )
+            }
         }
     }
 }
@@ -287,6 +310,7 @@ private fun FormularioPerfil(
 @Composable
 private fun SeccionFoto(
     uiState: PerfilUiState,
+    cuenta: Cuenta?,
     onTomarFoto: () -> Unit,
     onElegirDeGaleria: () -> Unit,
     onEliminarFoto: () -> Unit
@@ -302,12 +326,25 @@ private fun SeccionFoto(
         )
 
         Text(
-            text = if (uiState.nombre.isBlank()) "Tu perfil" else uiState.nombre,
+            text = when {
+                uiState.nombre.isNotBlank() -> uiState.nombre
+                cuenta != null -> cuenta.nombre
+                else -> "Tu perfil"
+            },
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        if (cuenta != null) {
+            Text(
+                text = cuenta.correo,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            RolBadge(rol = cuenta.rol)
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -499,6 +536,76 @@ private fun CampoPerfil(
         ),
         shape = RoundedCornerShape(8.dp)
     )
+}
+
+/** Datos de la sesión: rol, qué permite y botón para cerrar sesión. */
+@Composable
+private fun SeccionCuenta(
+    cuenta: Cuenta,
+    onCerrarSesion: () -> Unit
+) {
+    var confirmarSalida by rememberSaveable { mutableStateOf(false) }
+
+    if (confirmarSalida) {
+        AlertDialog(
+            onDismissRequest = { confirmarSalida = false },
+            icon = { Icon(painter = painterResource(R.drawable.ic_salir), contentDescription = null) },
+            title = { Text("Cerrar sesión") },
+            text = { Text("Tus datos de perfil y favoritos quedan guardados en este dispositivo.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarSalida = false
+                    onCerrarSesion()
+                }) { Text("Cerrar sesión") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarSalida = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        TituloSeccion(texto = "Mi cuenta")
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            RolBadge(rol = cuenta.rol)
+            Text(
+                text = cuenta.rol.descripcion,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (cuenta.rol != Rol.ADMIN) {
+            Text(
+                text = "Solo un administrador puede cambiar tu perfil de acceso.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        OutlinedButton(
+            onClick = { confirmarSalida = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_salir),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Cerrar sesión", color = MaterialTheme.colorScheme.error)
+        }
+    }
 }
 
 @Composable
