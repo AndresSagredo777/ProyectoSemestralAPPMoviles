@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -56,60 +55,6 @@ fun TituloSeccion(
         Text(
             text = texto,
             style = MaterialTheme.typography.titleLarge
-        )
-    }
-}
-
-@Composable
-fun TiposContenido() {
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        EtiquetaContenido(
-            texto = "Recetas",
-            modifier = Modifier.weight(1f)
-        )
-
-        EtiquetaContenido(
-            texto = "Cursos",
-            modifier = Modifier.weight(1f)
-        )
-
-        EtiquetaContenido(
-            texto = "Videos",
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-fun EtiquetaContenido(
-    texto: String,
-    modifier: Modifier = Modifier
-) {
-
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
-    ) {
-
-        Text(
-            text = texto,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(
-                horizontal = 12.dp,
-                vertical = 10.dp
-            )
         )
     }
 }
