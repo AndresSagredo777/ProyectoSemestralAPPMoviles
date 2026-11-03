@@ -16,4 +16,10 @@ sealed class Ruta(val ruta: String) {
     }
 
     object Perfil : Ruta("perfil")
+
+    /** Panel del Chef: publicar recetas (CHEF y ADMIN). */
+    object Recetas : Ruta("recetas")
+
+    /** Panel de Administración: gestionar cuentas (solo ADMIN). */
+    object Admin : Ruta("admin")
 }
