@@ -1,122 +1,186 @@
 # Master Martini — Aplicación móvil
 
-Proyecto académico de **Desarrollo de Aplicaciones Móviles (DSY1105), Duoc UC**. Aplicación Android orientada a explorar contenido educativo de Master Martini, organizado en categorías y videos de especialidades como chocolatería, pastelería y heladería.
-
-> **Proyecto académico / prototipo funcional.** Los datos de categorías y videos se entregan desde listas definidas en el backend; no hay una base de datos de servidor configurada.
+Proyecto académico de **Desarrollo de Aplicaciones Móviles (DSY1105), Duoc UC**, desarrollado por el Grupo 9. La aplicación Android permite explorar contenido de Master Martini organizado en especialidades y videos, acceder a recetas en PDF y utilizar funciones locales como favoritos, perfil y formulario de contacto.
 
 ## Integrantes
 
-- **Agustín:** Agustín Pérez — Home adaptable, categorías, videos, navegación, integración Retrofit y backend básico.
-- **Eduardo:** Eduardo Caro — perfil, recursos nativos, almacenamiento local, favoritos y navegación principal.
-- **Andrés:** Andrés Sagredo — formulario de contacto, validaciones y guardado local del borrador.
-
-**Grupo:** Grupo 9
+- **Agustín Pérez:** Home adaptable, categorías, videos, navegación, integración Retrofit y backend Spring Boot con persistencia H2.
+- **Eduardo Caro:** perfil, recursos nativos, almacenamiento local, favoritos y navegación principal.
+- **Andrés Sagredo:** formulario de contacto, validaciones y guardado local del borrador.
 
 ## Funcionalidades
 
-- Interfaz con **Jetpack Compose y Material 3**, siguiendo una identidad visual compartida.
-- **Home adaptable** a tamaños de ventana Compact, Medium y Expanded.
-- **Navegación** entre Inicio, Categorías, Videos y Mi perfil.
-- **Categorías** obtenidas desde el backend, con estados de carga, error y ausencia de contenido.
-- **Videos** obtenidos desde API REST, filtrados por categoría y abiertos mediante `Intent` en YouTube o navegador.
-- **Perfil local:** formulario de nombre y celular con validaciones y mensajes por campo.
-- **Cámara y galería** para elegir la foto de perfil, con manejo de permisos y almacenamiento de la imagen dentro de la app.
-- **Favoritos de videos**, almacenados localmente para conservar la selección al cerrar y volver a abrir la aplicación.
-- **Persistencia local** mediante DataStore (perfil y favoritos).
-- **Animaciones funcionales** de confirmación, foto de perfil y botón de favoritos.
-- **Formulario de contacto** con nombre, correo electrónico y mensaje, validación visual y guardado local mediante SharedPreferences. **No envía correos ni solicitudes a un servidor**: conserva un borrador en el dispositivo.
+- Interfaz Android con **Kotlin, Jetpack Compose y Material 3**.
+- Home adaptable a tamaños de ventana compactos, medianos y expandidos.
+- Navegación por Inicio, Categorías, Videos y Perfil.
+- **6 especialidades** obtenidas desde una API REST: Chocolatería, Pastelería, Panadería, Heladería, Bollería y Galletas y horneo.
+- **4 videos iniciales**, consultados desde la API, filtrados por especialidad y abiertos con YouTube o el navegador.
+- Descarga de archivos PDF de recetas desde el backend.
+- Perfil con validaciones, selección de foto mediante cámara o galería y almacenamiento local.
+- Favoritos de videos y datos de perfil persistidos localmente con DataStore.
+- Formulario de contacto con validaciones y borrador local mediante SharedPreferences; **no envía mensajes a un servidor**.
+- Pantallas y funciones para los roles contemplados en el proyecto (administrador, chef y usuario).
 
-## Tecnologías utilizadas
+## Tecnologías
 
-| Componente               | Tecnología                                                   |
-| ------------------------ | ------------------------------------------------------------ |
-| App móvil                | Kotlin, Android, Jetpack Compose, Material 3                 |
-| Navegación               | Navigation Compose                                           |
-| Estado de pantallas      | ViewModel, UiState, StateFlow y corrutinas                   |
-| Cliente HTTP             | Retrofit + Gson                                              |
-| Persistencia local       | DataStore Preferences y SharedPreferences                    |
-| Recursos del dispositivo | Cámara (`TakePicture`), galería (`GetContent`), FileProvider |
-| Backend                  | Java 17, Spring Boot, API REST                               |
-| Colaboración             | Git, GitHub y Trello                                         |
+| Capa | Tecnologías |
+| --- | --- |
+| Android | Kotlin, Jetpack Compose, Material 3, Navigation Compose |
+| Arquitectura Android | ViewModel, UiState, StateFlow, corrutinas |
+| Comunicación | Retrofit y Gson; HTTP/JSON |
+| Backend | Java 17, Spring Boot 4.1.1, Spring Web MVC |
+| Persistencia del servidor | Spring Data JPA, Hibernate, H2 en archivo local |
+| Persistencia del dispositivo | DataStore Preferences y SharedPreferences |
+| Recursos Android | Cámara, galería, FileProvider, DownloadManager |
+| Herramientas | Android Studio, Maven Wrapper, Gradle Wrapper, Git y GitHub |
 
-## Estructura del proyecto
+## Arquitectura
+
+Flujo de consulta de especialidades y videos:
+
+```text
+Android (Jetpack Compose)
+  -> ViewModel
+  -> Repository de Android / Retrofit
+  -> API REST (Controller de Spring Boot)
+  -> Service
+  -> Repository de Spring Data JPA
+  -> Base de datos H2
+```
+
+El backend está organizado en los paquetes `controller`, `service`, `repository`, `model` y `config`.
+
+- **Controller:** recibe las solicitudes HTTP y devuelve JSON.
+- **Service:** coordina las operaciones sobre las entidades.
+- **Repository:** utiliza Spring Data JPA para acceder a H2.
+- **Model:** define las entidades `Categoria` y `Video`.
+- **Config:** incorpora los datos iniciales si las tablas correspondientes están vacías.
+
+H2 utiliza la configuración `jdbc:h2:file:./data/mastermartini` en `backend/src/main/resources/application.properties`. Si el backend se ejecuta desde la carpeta `backend`, la base se guarda en `backend/data/`. Esta carpeta está excluida de Git: **cada integrante genera su propia base local** al iniciar el proyecto.
+
+La primera ejecución crea las tablas e incorpora **6 categorías y 4 videos**. La base de datos conserva los cambios después de reiniciar el servidor.
+
+## Estructura del repositorio
 
 ```text
 app/
   src/main/java/cl/duoc/mastermartiniapp/
-    navigation/      # Rutas y grafo de navegación
-    ui/screens/      # Home, categorías, videos, perfil y formulario
-    ui/theme/        # Colores, tipografía y tema visual
-    viewmodel/       # Lógica, validaciones y estado de las pantallas
-    repository/      # Acceso a API y almacenamiento local
-    network/         # Configuración de Retrofit y operaciones HTTP
-    data/local/      # Configuración de DataStore
-    model/           # Modelos de datos Kotlin
+    navigation/    # Navegación
+    ui/screens/    # Pantallas de la aplicación
+    viewmodel/     # Estado y lógica de presentación
+    repository/    # API y almacenamiento local
+    network/       # Retrofit y endpoints
+    data/local/    # DataStore
+    model/         # Modelos Android
 backend/
   src/main/java/cl/duoc/mastermartini/
-    controller/      # Endpoints REST de categorías y videos
-    model/           # Modelos de datos Java
+    controller/    # Endpoints REST
+    service/       # Servicios
+    repository/    # Spring Data JPA
+    model/         # Entidades JPA
+    config/        # Datos iniciales
+  src/main/resources/
+    application.properties
+    static/recetas/ # PDF disponibles desde el backend
+  src/test/
+    java/          # Tests de Spring Boot
+    resources/     # Configuración H2 temporal para pruebas
 ```
 
-## Requisitos para ejecutar
+## Requisitos
 
-- Android Studio con el SDK requerido por el proyecto, un emulador Android o teléfono de prueba.
-- JDK **17** para el backend Spring Boot.
-- Conexión a Internet para obtener dependencias y abrir los videos de YouTube.
-- Gradle se administra mediante el _wrapper_ incluido en el repositorio.
+- Android Studio y SDK compatible con la configuración Gradle del proyecto.
+- Emulador de Android o teléfono compatible para ejecutar la aplicación.
+- JDK 17 o superior compatible con Spring Boot 4.1.1.
+- Conexión a Internet para obtener dependencias y abrir videos externos.
+- Puerto `8080` disponible para el backend.
 
-## Instrucciones de ejecución
+Se incluyen los wrappers de Maven y Gradle, por lo que no es necesario instalar manualmente ambos programas.
+
+## Ejecución local
 
 ### 1. Iniciar el backend
 
-En Windows, desde una terminal ubicada en la carpeta raíz del repositorio:
+Abrir PowerShell desde la raíz del repositorio y ejecutar:
 
 ```powershell
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-La API queda disponible en el puerto **8080**. Comprobar en el navegador del computador:
+Mantener esa terminal abierta mientras se utiliza Android. Cuando el servidor esté iniciado, comprobar:
 
 - `http://localhost:8080/api/categorias`
 - `http://localhost:8080/api/videos`
 
-Ambos endpoints deben devolver datos JSON. Mantener el backend ejecutándose mientras se prueba la aplicación.
+En una instalación nueva, la API debe mostrar 6 categorías y 4 videos iniciales.
 
-### 2. Ejecutar la app Android
+**Importante:** no iniciar dos servidores que usen simultáneamente el mismo archivo H2, porque puede aparecer un error de base de datos bloqueada.
 
-1. Abrir **Android Studio** y seleccionar la **carpeta raíz del repositorio** (la que contiene `settings.gradle.kts`).
-2. Esperar la sincronización de Gradle; comprobar que no haya errores de compilación.
-3. Seleccionar un emulador Android compatible (o un dispositivo físico configurado para depuración).
-4. Ejecutar la configuración de la aplicación (`app`) con **Run**.
-5. Recorrer Inicio → Categorías → Videos; luego probar Mi perfil y el formulario de contacto.
+### 2. Configurar Retrofit
 
-La dirección configurada en `ClienteRetrofit.kt` es:
+La URL se define en:
+
+`app/src/main/java/cl/duoc/mastermartiniapp/network/ClienteRetrofit.kt`
+
+Para el **emulador Android Studio**, con el backend ejecutándose en el mismo computador:
 
 ```kotlin
 private const val BASE_URL = "http://10.0.2.2:8080/"
 ```
 
-**`10.0.2.2` se utiliza desde el emulador Android** para acceder al servidor que está en el mismo computador. Si se usa un teléfono físico, se debe configurar la IP local del computador como `BASE_URL`, conectar ambos a la misma red y permitir el acceso al puerto 8080.
+`10.0.2.2` permite que el emulador se conecte al `localhost` del computador anfitrión.
 
-## Pruebas realizadas
+Para un **celular físico**, cambiar esa URL por la dirección IP local del computador que ejecuta el backend, verificar que estén en la misma red y permitir las conexiones al puerto `8080`.
 
-Se verificó la integración de los tres módulos del proyecto mediante compilación, pruebas unitarias y ejecución en un emulador Android.
+### 3. Ejecutar Android
 
-- Compilación exitosa mediante `:app:assembleDebug`.
-- Ejecución exitosa de la tarea `:app:testDebugUnitTest`.
-- Inicio correcto de la aplicación y navegación entre pantallas.
-- Consulta y visualización de categorías y videos desde el backend Spring Boot.
-- Registro y persistencia de datos del perfil después de cerrar y volver a abrir la aplicación.
-- Captura de fotografías con la cámara y actualización de la foto de perfil.
-- Visualización de videos favoritos.
+1. Abrir en Android Studio la **carpeta raíz** del repositorio, donde está `settings.gradle.kts`.
+2. Esperar la sincronización de Gradle.
+3. Iniciar el backend y confirmar sus endpoints.
+4. Seleccionar un emulador o un dispositivo Android conectado.
+5. Ejecutar el módulo `app` y recorrer Inicio, Categorías, Videos y Perfil.
 
-**Resultado:** La aplicación compiló correctamente y las funcionalidades indicadas se comprobaron en el emulador.
+### 4. Ejecutar los tests del backend
+
+Desde `backend`:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Los tests usan una base H2 **en memoria** configurada en `src/test/resources/application.properties`, separada de la base de datos del servidor. El test actual comprueba que el contexto de Spring Boot se inicia correctamente.
+
+## API REST
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/api/categorias` | Obtener todas las categorías de H2. |
+| GET | `/api/videos` | Obtener todos los videos de H2. |
+| POST | `/api/videos` | Guardar un video recibido como JSON. |
+| DELETE | `/api/videos/{id}` | Eliminar un video por su ID; responde `204` si se elimina o `404` si no existe. |
+
+Los endpoints POST y DELETE están destinados a las pruebas académicas locales. **No cuentan con autenticación ni validaciones completas**, por lo que el backend no está preparado para publicarse como servicio abierto en Internet.
+
+## Comprobaciones realizadas
+
+- Compilación e inicio del backend Spring Boot con conexión a H2.
+- Creación de tablas `categorias` y `videos` por JPA.
+- Consultas GET con resultado de **6 categorías y 4 videos**.
+- Registro de un quinto video de prueba mediante POST.
+- Confirmación de ese video dentro de la aplicación Android.
+- Verificación de persistencia tras reiniciar Spring Boot.
+- Eliminación del video de prueba mediante DELETE; se restauró la cantidad original de 4 videos.
+- Ejecución de `mvnw.cmd test` con **BUILD SUCCESS** y un test de inicio.
+
+Las funcionalidades Android de perfil, favoritos, roles, formularios y descarga de PDF deben comprobarse también durante la revisión final del grupo.
 
 ## Consideraciones
 
-- Los endpoints del backend devuelven datos de ejemplo en memoria y no utilizan una base de datos persistente.
-- El filtrado de videos por categoría se realiza en Android sobre la respuesta de `/api/videos`.
-- El almacenamiento del perfil y favoritos **es local al dispositivo**; no se sincroniza con el backend.
-- El formulario de contacto **no implementa un envío real de consulta**. El botón valida y conserva el borrador local.
-- El código debe quedar congelado tras la entrega y antes de la evaluación, según las instrucciones de EP2.
+- La base de datos H2 es **local al computador que ejecuta el backend**; sus archivos no se incluyen en Git.
+- Perfil y favoritos continúan almacenándose **en el dispositivo Android**; no se sincronizan con H2.
+- El filtrado de videos por especialidad se realiza desde Android sobre el resultado de `GET /api/videos`.
+- Los PDF originales están disponibles como recursos estáticos del backend.
+- El formulario de contacto valida y guarda un borrador local, pero no realiza un envío real.
+- La URL de Retrofit debe corresponder al entorno de ejecución (emulador o teléfono físico).
+- Antes de la evaluación, el grupo debe contrastar la implementación con la pauta oficial de EP3.
