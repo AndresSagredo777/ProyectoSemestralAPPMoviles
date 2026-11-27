@@ -1,8 +1,15 @@
 package cl.duoc.mastermartini.model;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "videos")
 public class Video {
 
+    @Id
     private Long id;
+
     private String titulo;
     private String descripcion;
     private String categoria;
