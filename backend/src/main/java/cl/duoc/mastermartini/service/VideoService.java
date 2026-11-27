@@ -1,3 +1,4 @@
+
 package cl.duoc.mastermartini.service;
 
 import cl.duoc.mastermartini.model.Video;
@@ -17,5 +18,18 @@ public class VideoService {
 
     public List<Video> obtenerVideos() {
         return videoRepository.findAll();
+    }
+
+    public Video guardarVideo(Video video) {
+        return videoRepository.save(video);
+    }
+
+    public boolean eliminarVideo(Long id) {
+        if (!videoRepository.existsById(id)) {
+            return false;
+        }
+
+        videoRepository.deleteById(id);
+        return true;
     }
 }
